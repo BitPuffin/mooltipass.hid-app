@@ -95,7 +95,7 @@ type OutgoingPacket =
    | OutgoingGetPassword
    | OutgoingSetLogin           ByteString
    | OutgoingSetPassword        ByteString
-   | OutgoingCheckPassword
+   | OutgoingCheckPassword      ByteString
    | OutgoingAddContext         ByteString
    | OutgoingExportFlashStart
    | OutgoingExportFlash
@@ -231,18 +231,18 @@ toInts msg =
             (String.length s + 1)::msgType::stringToInts s ++ [0]
         zeroSize msgType     = [0, msgType]
     in case msg of
-        OutgoingDebug       s  -> byteString cmd_DEBUG s
-        OutgoingPing           -> zeroSize cmd_PING
-        OutgoingGetVersion     -> zeroSize cmd_VERSION
-        OutgoingSetContext  s  -> byteStringNull cmd_CONTEXT s
-        OutgoingGetLogin       -> zeroSize cmd_GET_LOGIN
-        OutgoingGetPassword    -> zeroSize cmd_GET_PASSWORD
-        OutgoingSetLogin    s  -> byteStringNull cmd_SET_LOGIN s
-        OutgoingSetPassword s  -> byteStringNull cmd_SET_PASSWORD s
-        OutgoingCheckPassword  -> zeroSize cmd_CHECK_PASSWORD
-        OutgoingAddContext  s  -> byteStringNull cmd_ADD_CONTEXT s
-        OutgoingExportFlash    -> zeroSize cmd_EXPORT_FLASH
-        OutgoingExportFlashEnd -> zeroSize cmd_EXPORT_FLASH_END
+        OutgoingDebug       s   -> byteString cmd_DEBUG s
+        OutgoingPing            -> zeroSize cmd_PING
+        OutgoingGetVersion      -> zeroSize cmd_VERSION
+        OutgoingSetContext  s   -> byteStringNull cmd_CONTEXT s
+        OutgoingGetLogin        -> zeroSize cmd_GET_LOGIN
+        OutgoingGetPassword     -> zeroSize cmd_GET_PASSWORD
+        OutgoingSetLogin    s   -> byteStringNull cmd_SET_LOGIN s
+        OutgoingSetPassword s   -> byteStringNull cmd_SET_PASSWORD s
+        OutgoingCheckPassword s -> byteStringNull cmd_CHECK_PASSWORD s
+        OutgoingAddContext  s   -> byteStringNull cmd_ADD_CONTEXT s
+        OutgoingExportFlash     -> zeroSize cmd_EXPORT_FLASH
+        OutgoingExportFlashEnd  -> zeroSize cmd_EXPORT_FLASH_END
         OutgoingImportFlashStart space ->
             [ 1
             , cmd_IMPORT_FLASH_BEGIN

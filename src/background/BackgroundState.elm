@@ -25,6 +25,7 @@ type alias BackgroundState =
     , bgGetParameter     : List Parameter
     , common             : CommonState
     , blockSetExtRequest : Bool
+    , checkCredentials   : CheckCredentialsRequest
     , setCredentials     : SetCredentialsRequest
     , extRequestBuff     : List ExtensionRequest
     }
@@ -42,6 +43,7 @@ default = { deviceConnected    = False
           , bgGetParameter     = []
           , common             = Common.default
           , blockSetExtRequest = False
+          , checkCredentials   = CheckCredentialsDone
           , setCredentials     = SetCredentialsDone
           , extRequestBuff     = []
           }
@@ -201,6 +203,12 @@ type ExtensionRequest =
     | ExtRandomNumber         ByteString
 
     | NoRequest
+
+type CheckCredentialsRequest =
+      CheckCredentials { context  : ByteString
+                       , password : ByteString
+                       }
+    | CheckCredentialsDone
 
 type SetCredentialsRequest =
       SetContext    { context  : ByteString

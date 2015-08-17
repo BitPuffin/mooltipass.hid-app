@@ -77,6 +77,10 @@ encode s =
         (getParam, outParam) = case (s.waitingForDevice, s.bgGetParameter) of
             (False, (p::_)) -> (True, OutgoingGetParameter p)
             _               -> (False, OutgoingDebug "DeviceMessage error in getParam")
+        (checkCreds, mCheckCredsCmd) =
+            case (s.waitingForDevice, needToCheckCredentials s.checkCredentials) of
+                (False, True) -> (True, encodeCheckCredentials s.currentContext s.checkCredentials)
+                _ -> (False, Nothing)
         (setCreds, mSetCredsCmd) =
             case (s.waitingForDevice, needToSetCreds s.setCredentials) of
                 (False, True) -> (True, encodeSetCredentials s.currentContext
@@ -85,6 +89,9 @@ encode s =
     in if | not s.deviceConnected -> (connect, [])
           | setParam              -> sendCommand' outCmd []
           | getParam              -> sendCommand' outParam []
+          | checkCreds            -> case mCheckCredsCmd of
+              Nothing  -> (emptyToDeviceMessage, [])
+              Just cmd -> sendCommand' cmd []
           | setCreds              -> case mSetCredsCmd of
               Nothing  -> (emptyToDeviceMessage, [])
               Just cmd -> sendCommand' cmd []
@@ -214,6 +221,19 @@ extRequestToPacket cc extRequest =
             else Just (OutgoingSetContext context)
         ExtWantsRandomNumber -> Just OutgoingGetRandomNumber
         _ -> Nothing
+
+needToCheckCredentials : CheckCredentialsRequest -> Bool
+needToCheckCredentials r = case r of
+    CheckCredentialsDone -> False
+    _                    -> True
+
+
+encodeCheckCredentials : String -> CheckCredentialsRequest -> Maybe OutgoingPacket
+encodeCheckCredentials cc r = case r of
+    CheckCredentials {context, password} ->
+        if cc == context then Just (OutgoingCheckPassword password)
+        else Just (OutgoingSetContext context)
+    CheckCredentialsDone -> Nothing
 
 needToSetCreds : SetCredentialsRequest -> Bool
 needToSetCreds r = case r of
